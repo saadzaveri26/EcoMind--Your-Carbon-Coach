@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #16A34A;
+  --color-primary-fixed: #7ffc97;
+  --color-primary-fixed-dim: #62df7d;
+  --color-on-primary: #003914;
+  --color-primary-container: #1ca64d;
+  --color-on-primary-container: #003111;
+  --color-inverse-primary: #006e2d;
+
+  --color-secondary: #94de2d;
+  --color-on-secondary: #1f3700;
+  --color-secondary-container: #7ac100;
+  --color-on-secondary-container: #2c4900;
+  --color-secondary-fixed: #acf847;
+  --color-secondary-fixed-dim: #91db2a;
+  --color-on-secondary-fixed: #102000;
+  --color-on-secondary-fixed-variant: #304f00;
+
+  --color-tertiary: #adc6ff;
+  --color-on-tertiary: #002e6a;
+  --color-tertiary-container: #4d8eff;
+  --color-on-tertiary-container: #00285d;
+  --color-tertiary-fixed: #d8e2ff;
+  --color-tertiary-fixed-dim: #adc6ff;
+  --color-on-tertiary-fixed: #001a42;
+  --color-on-tertiary-fixed-variant: #004395;
+
+  --color-background: #0A1628;
+  --color-on-background: #d7e3fc;
+
+  --color-surface: #071325;
+  --color-surface-dim: #071325;
+  --color-surface-bright: #2e394d;
+  --color-on-surface: #d7e3fc;
+  --color-on-surface-variant: #bdcaba;
+  --color-inverse-surface: #d7e3fc;
+  --color-inverse-on-surface: #253144;
+  --color-surface-tint: #62df7d;
+  --color-surface-variant: #2a3548;
+
+  --color-surface-container-lowest: #030e20;
+  --color-surface-container-low: #101c2e;
+  --color-surface-container: #142032;
+  --color-surface-container-high: #1f2a3d;
+  --color-surface-container-highest: #2a3548;
+
+  --color-outline: #879485;
+  --color-outline-variant: #3e4a3d;
+
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+
+  --font-display: "DM Sans", sans-serif;
+  --font-body: "DM Sans", sans-serif;
+}
+
+body {
+  background-color: #0A1628;
+  color: #d7e3fc;
+  font-family: "DM Sans", sans-serif;
+  min-height: max(884px, 100dvh);
+}
+
+.glass-panel {
+  background-color: #1E293B;
+  border: 1px solid #334155;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
