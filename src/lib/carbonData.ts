@@ -19,7 +19,7 @@ export const CARBON_FACTORS: CarbonFactorConfig = {
     auto_rickshaw: { factor: 0.097, unit: "km", label: "Auto Rickshaw" },
   },
   Food: {
-    beef_meal: { factor: 6.61, unit: "meals", label: "Beef Meal" },
+    Seafood_meal: { factor: 6.61, unit: "meals", label: "SeaFood Meal" },
     chicken_meal: { factor: 1.24, unit: "meals", label: "Chicken Meal" },
     vegetarian_meal: { factor: 0.37, unit: "meals", label: "Vegetarian Meal" },
     vegan_meal: { factor: 0.18, unit: "meals", label: "Vegan Meal" },

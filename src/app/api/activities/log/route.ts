@@ -66,7 +66,15 @@ export async function POST(req: NextRequest) {
       totalToday: Number(totalToday.toFixed(3)),
     });
   } catch (error) {
-    console.error("Error logging activity:", error);
+    console.error("Error logging activity inside app/api/activities/log/route.ts:", error);
+    if (error instanceof Error) {
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+      });
+    } else {
+      console.error("Unknown error object:", error);
+    }
     const msg = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json({ message: msg }, { status: 500 });
   }
