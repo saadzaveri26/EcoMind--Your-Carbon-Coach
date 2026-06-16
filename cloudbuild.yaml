@@ -1,17 +1,25 @@
 steps:
   # Step 1: Build the container image
-  - name: "gcr.io/cloud-builders/docker"
+  - name: 'gcr.io/cloud-builders/docker'
     args:
-      - "build"
-      - "-t"
-      - "asia-south1-docker.pkg.dev/${PROJECT_ID}/ecomind/ecomind-app:latest"
-      - "."
+      - 'build'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyC8A7DQcdhZRqgwnoWu-BImskqIo13dmM8'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=ecomind-carbon-coach.firebaseapp.com'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_FIREBASE_PROJECT_ID=ecomind-carbon-coach'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_FIREBASE_APP_ID=1:903694242938:web:317cb9bf166cc7323257c3'
+      - '-t'
+      - 'asia-south1-docker.pkg.dev/ecomind-carbon-coach/ecomind/ecomind-app:latest'
+      - '.'
 
   # Step 2: Push the container image to Artifact Registry
   - name: "gcr.io/cloud-builders/docker"
     args:
       - "push"
-      - "asia-south1-docker.pkg.dev/${PROJECT_ID}/ecomind/ecomind-app:latest"
+      - "asia-south1-docker.pkg.dev/ecomind-carbon-coach/ecomind/ecomind-app:latest"
 
   # Step 3: Deploy to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
@@ -20,7 +28,7 @@ steps:
       - "run"
       - "deploy"
       - "ecomind-carbon-coach"
-      - "--image=asia-south1-docker.pkg.dev/${PROJECT_ID}/ecomind/ecomind-app:latest"
+      - "--image=asia-south1-docker.pkg.dev/ecomind-carbon-coach/ecomind/ecomind-app:latest"
       - "--region=asia-south1"
       - "--platform=managed"
       - "--allow-unauthenticated"
