@@ -19,7 +19,7 @@ steps:
     args:
       - "run"
       - "deploy"
-      - "ecomind"
+      - "ecomind-carbon-coach"
       - "--image=asia-south1-docker.pkg.dev/${PROJECT_ID}/ecomind/ecomind-app:latest"
       - "--region=asia-south1"
       - "--platform=managed"
@@ -37,7 +37,7 @@ steps:
       - "run"
       - "services"
       - "add-iam-policy-binding"
-      - "ecomind"
+      - "ecomind-carbon-coach"
       - "--region=asia-south1"
       - "--member=allUsers"
       - "--role=roles/run.invoker"
