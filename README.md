@@ -4,8 +4,8 @@
 
 EcoMind helps individuals understand, track, and reduce their carbon footprint through simple daily logging, Gemini-powered personalized insights, and weekly eco-challenges — all tailored to Indian lifestyle and infrastructure.
 
-🔗 **Live Demo:** https://ecomind-951028874531.asia-south1.run.app  
-📂 **GitHub:** https://github.com/saadzaveri26/EcoMind
+🔗 **Live Demo:** https://ecomind-carbon-coach-499610-837024613769.asia-south1.run.app/
+
 
 ---
 
