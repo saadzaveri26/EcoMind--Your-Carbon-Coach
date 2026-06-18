@@ -5,11 +5,34 @@ import { getClientIp, isRateLimited } from "@/lib/rateLimit";
 import { INDIA_DAILY_AVERAGE } from "@/lib/carbonData";
 import { QueryDocumentSnapshot } from "firebase-admin/firestore";
 
+/**
+ * @module api/activities/summary
+ * @description Weekly summary endpoint — core of the "understand" pillar.
+ *
+ * Problem Statement Alignment:
+ * - **Understand**: Aggregates N days of activities into daily breakdowns
+ *   and category totals, enabling comparison bars and trend charts.
+ * - **Personalized insights**: Compares the user's daily average against
+ *   the India national average (11.2 kg CO2/day), providing context
+ *   that makes the footprint personally meaningful.
+ * - **Track**: Powers the 7-day stacked bar chart on the /track page.
+ */
+
 const querySchema = z.object({
   userId: z.string().min(1),
   days: z.preprocess((val) => (val ? Number(val) : 7), z.number().int().min(1)),
 });
 
+/**
+ * GET /api/activities/summary?userId=...&days=...
+ *
+ * Fetches all activities for a user, groups them by date and category,
+ * and returns a daily breakdown array with totals and a percentage
+ * comparison against India's average daily footprint.
+ *
+ * @param req - NextRequest with query params: userId (required), days (optional, default 7)
+ * @returns JSON { dailyBreakdown, totalCO2, byCategory, comparedToAverage }
+ */
 export async function GET(req: NextRequest) {
   const ip = getClientIp(req);
   if (isRateLimited(ip, 60)) {

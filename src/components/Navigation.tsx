@@ -18,11 +18,11 @@ export default function Navigation() {
     <>
       {/* Desktop Header */}
       <header className="fixed top-0 left-0 right-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 hidden md:flex items-center justify-between px-6 h-16 transition-all duration-300">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2" aria-label="EcoMind home">
           <Icons.Leaf className="text-primary w-6 h-6 animate-pulse" />
           <span className="font-display text-xl font-bold text-primary">EcoMind</span>
         </Link>
-        <nav className="flex gap-8">
+        <nav className="flex gap-8" aria-label="Main navigation">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -45,20 +45,21 @@ export default function Navigation() {
 
       {/* Mobile Top Header */}
       <header className="fixed top-0 left-0 right-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 flex items-center justify-between px-6 h-16 md:hidden shadow-sm">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2" aria-label="EcoMind home">
           <Icons.Leaf className="text-primary w-5 h-5" />
           <span className="font-display text-lg font-bold text-primary">EcoMind</span>
         </Link>
       </header>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 w-full z-50 rounded-t-xl border-t border-outline-variant/30 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.5)] bg-surface/80 backdrop-blur-xl flex justify-around items-center h-20 px-4 pb-safe md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 w-full z-50 rounded-t-xl border-t border-outline-variant/30 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.5)] bg-surface/80 backdrop-blur-xl flex justify-around items-center h-20 px-4 pb-safe md:hidden" aria-label="Mobile navigation">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
               key={item.href}
               href={item.href}
+              aria-label={`Navigate to ${item.label}`}
               className={`flex flex-col items-center justify-center gap-1 active:scale-90 transition-all duration-200 ${
                 isActive ? "text-primary font-bold" : "text-on-surface-variant hover:text-primary/80"
               }`}

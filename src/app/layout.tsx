@@ -10,8 +10,27 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "EcoMind — Your Carbon Coach",
-  description: "EcoMind tracks your carbon footprint and coaches you toward a greener lifestyle with personalized insights and challenges.",
+  title: "EcoMind — AI Carbon Footprint Coach | Track, Understand & Reduce CO2",
+  description:
+    "EcoMind helps individuals understand, track, and reduce their carbon footprint through simple daily logging, Gemini-powered personalized insights, and weekly eco-challenges — tailored to Indian lifestyle.",
+  keywords: [
+    "carbon footprint tracker",
+    "carbon coach",
+    "CO2 reduction",
+    "eco challenges",
+    "sustainability app",
+    "India carbon emissions",
+    "Gemini AI insights",
+    "green lifestyle",
+  ],
+  authors: [{ name: "EcoMind Team" }],
+  openGraph: {
+    title: "EcoMind — AI Carbon Footprint Coach",
+    description:
+      "Track your daily carbon footprint, get AI-powered insights from Gemini, and complete personalized eco-challenges.",
+    type: "website",
+    locale: "en_IN",
+  },
 };
 
 export default function RootLayout({
@@ -29,7 +48,9 @@ export default function RootLayout({
       </head>
       <body className="bg-background text-on-background font-body antialiased pb-24 md:pb-0 pt-16 md:pt-24 min-h-screen">
         <Navigation />
-        {children}
+        <main id="main-content">
+          {children}
+        </main>
       </body>
     </html>
   );

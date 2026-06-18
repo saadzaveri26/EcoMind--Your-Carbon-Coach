@@ -5,6 +5,19 @@ import { calculateCO2 } from "@/lib/carbonData";
 import { getClientIp, isRateLimited } from "@/lib/rateLimit";
 import { FieldValue, QueryDocumentSnapshot } from "firebase-admin/firestore";
 
+/**
+ * @module api/activities/log
+ * @description Activity logging endpoint — core of the "track" pillar.
+ *
+ * Problem Statement Alignment:
+ * - **Track**: Persists each user activity with its computed CO2 to Firestore,
+ *   enabling daily and weekly footprint tracking.
+ * - **Simple actions**: Accepts a single activity log (category + type + quantity)
+ *   making one-tap logging possible from the UI.
+ * - **Understand**: Returns the running daily total so the user sees their
+ *   cumulative impact in real time via the Carbon Gauge.
+ */
+
 const logSchema = z.object({
   userId: z.string().min(1),
   category: z.enum(["Transport", "Food", "Energy", "Shopping"]),
@@ -13,6 +26,16 @@ const logSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
 
+/**
+ * POST /api/activities/log
+ *
+ * Validates and logs a single carbon-producing activity for a user.
+ * Calculates CO2 using India-specific emission factors, saves to Firestore,
+ * and returns the activity's CO2 plus the user's running daily total.
+ *
+ * @param req - NextRequest with JSON body: { userId, category, activityType, quantity, date }
+ * @returns JSON { ok, co2kg, totalToday } on success, or error with status 400/429/500
+ */
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
   if (isRateLimited(ip, 60)) {

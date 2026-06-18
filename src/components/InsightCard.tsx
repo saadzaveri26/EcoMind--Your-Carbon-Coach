@@ -75,6 +75,7 @@ export default function InsightCard({ insight, onTryThis, isAdding = false }: In
           onClick={() => onTryThis(insight)}
           disabled={isAdding}
           className="shrink-0 w-full md:w-auto h-11 px-6 rounded-xl bg-surface-container-high text-on-surface hover:bg-surface-bright border border-outline-variant/30 transition-all duration-200 font-semibold text-sm active:scale-95 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+          aria-label={`Try insight: ${insight.title}`}
         >
           {isAdding ? (
             <>

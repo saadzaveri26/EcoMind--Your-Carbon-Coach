@@ -1,3 +1,21 @@
+/**
+ * @module lib/carbonData
+ * @description Core carbon emission factors, constants, and calculation utilities.
+ *
+ * Problem Statement Alignment:
+ * - **Track**: Provides India-specific CO2 emission factors across 4 categories
+ *   (Transport, Food, Energy, Shopping) used by the /track page to quantify
+ *   every user activity in kg CO2.
+ * - **Simple actions**: The `calculateCO2()` function enables one-tap logging
+ *   by instantly computing the carbon impact of any activity + quantity pair.
+ * - **Understand**: Constants like `INDIA_DAILY_AVERAGE` (11.2 kg) and
+ *   `GLOBAL_DAILY_AVERAGE` (15.1 kg) power the comparison bars on /insights.
+ * - **Reduce**: `TARGET_DAILY` (5.0 kg) sets the Paris-aligned sustainable
+ *   target displayed on the Carbon Gauge and used for challenge difficulty.
+ * - **Personalized insights**: Category metadata drives Gemini prompt context.
+ */
+
+/** Configuration shape for a single category's emission factors. */
 export interface CarbonFactorConfig {
   [category: string]: {
     [activityType: string]: {
@@ -83,10 +101,25 @@ export const CATEGORIES: Category[] = [
   },
 ];
 
+/** India national average daily CO2 footprint (kg) — CEA 2023. Used by /insights comparison bars. */
 export const INDIA_DAILY_AVERAGE = 11.2; // kg CO2
+/** Global average daily CO2 footprint (kg). Used by /insights comparison bars. */
 export const GLOBAL_DAILY_AVERAGE = 15.1; // kg CO2
+/** Paris Agreement-aligned sustainable daily target (kg). Used by CarbonGauge on /track. */
 export const TARGET_DAILY = 5.0; // sustainable target kg CO2
 
+/**
+ * Calculates CO2 emissions for a given activity.
+ *
+ * Problem Statement: Enables "simple actions" by instantly computing the
+ * carbon cost of any activity + quantity, powering the live CO2 preview
+ * on the /track page.
+ *
+ * @param category - One of Transport, Food, Energy, Shopping
+ * @param activityType - Specific activity key (e.g., 'car_petrol')
+ * @param quantity - Amount in the activity's unit (km, meals, kWh, items)
+ * @returns CO2 in kg, rounded to 3 decimal places. Returns 0 for unknown inputs.
+ */
 export function calculateCO2(
   category: string,
   activityType: string,
@@ -100,6 +133,15 @@ export function calculateCO2(
   return Number((config.factor * quantity).toFixed(3));
 }
 
+/**
+ * Returns the Monday of the current ISO week as a YYYY-MM-DD string.
+ *
+ * Used to key weekly Firestore documents (weeklyReports, challenges)
+ * ensuring each user gets one AI-generated insight set and challenge
+ * set per week — supporting the "personalized insights" pillar.
+ *
+ * @returns Date string for Monday of the current week (e.g., '2026-06-15')
+ */
 export function getMondayOfCurrentWeek(): string {
   const today = new Date();
   const day = today.getDay();

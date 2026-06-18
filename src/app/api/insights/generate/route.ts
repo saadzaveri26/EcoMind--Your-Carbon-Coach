@@ -6,6 +6,19 @@ import { getClientIp, isRateLimited } from "@/lib/rateLimit";
 import { getMondayOfCurrentWeek } from "@/lib/carbonData";
 import { FieldValue } from "firebase-admin/firestore";
 
+/**
+ * @module api/insights/generate
+ * @description AI insight generation endpoint — core of the "personalized insights" pillar.
+ *
+ * Problem Statement Alignment:
+ * - **Personalized insights**: Sends the user's ACTUAL weekly CO2 data to
+ *   Gemini 2.5 Flash, which returns 3 tailored, actionable tips — not generic advice.
+ * - **Understand**: Each insight includes an estimated weekly CO2 saving and
+ *   impact level (High/Medium/Low) so the user understands WHERE to act.
+ * - **Reduce**: Insights become the basis for weekly challenges, closing the
+ *   understand → act → reduce loop.
+ */
+
 const generateSchema = z.object({
   userId: z.string().min(1),
   lifestyle: z.string().min(1),
@@ -20,6 +33,16 @@ const generateSchema = z.object({
   }),
 });
 
+/**
+ * POST /api/insights/generate
+ *
+ * Generates 3 personalized AI insights by analyzing the user's weekly
+ * carbon footprint data with Gemini 2.5 Flash. Caches results per
+ * user per week in Firestore to avoid redundant API calls.
+ *
+ * @param req - NextRequest with JSON body: { userId, lifestyle, weekData: { totalCO2, breakdown } }
+ * @returns JSON array of insights: [{ title, tip, estimatedWeeklySaving, impactLevel, category }]
+ */
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
   if (isRateLimited(ip, 60)) {

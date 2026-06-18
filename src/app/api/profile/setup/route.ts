@@ -4,11 +4,32 @@ import { adminDb } from "@/lib/firebase-admin";
 import { getClientIp, isRateLimited } from "@/lib/rateLimit";
 import { FieldValue } from "firebase-admin/firestore";
 
+/**
+ * @module api/profile/setup
+ * @description User profile onboarding endpoint — enables personalization.
+ *
+ * Problem Statement Alignment:
+ * - **Personalized insights**: Captures the user's lifestyle focus category
+ *   (Transport/Food/Energy/Shopping) during onboarding, which Gemini uses
+ *   to generate tailored insights and challenges.
+ * - **Simple actions**: One-question setup makes onboarding frictionless.
+ */
+
 const profileSchema = z.object({
   userId: z.string().min(1),
   lifestyle: z.enum(["Transport", "Food", "Energy", "Shopping"]),
 });
 
+/**
+ * POST /api/profile/setup
+ *
+ * Creates or updates a user's profile with their lifestyle focus category.
+ * New profiles are initialized with a 5.0 kg daily CO2 target, zero streak,
+ * and empty badge collection.
+ *
+ * @param req - NextRequest with JSON body: { userId, lifestyle }
+ * @returns JSON { ok: true } on success
+ */
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
   if (isRateLimited(ip, 60)) {

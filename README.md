@@ -310,4 +310,36 @@ Each skill is a structured `.md` prompt file in `.agents/skills/`. The `startcyc
 
 ---
 
+## 🎯 Problem Statement Alignment
+
+The challenge states: *"Help individuals understand, track, and reduce their carbon footprint through simple actions and personalized insights."*
+
+Here is how each feature in EcoMind directly addresses each keyword in the problem statement:
+
+| Problem Statement Keyword | EcoMind Feature | Implementation Details |
+|---|---|---|
+| **"understand"** | `/insights` page with comparison bars | Compares the user's daily average against India (11.2 kg) and global (15.1 kg) averages. Gemini 2.5 Flash explains WHY certain activities produce more CO2, making the footprint personally meaningful. |
+| **"track"** | `/track` page with daily logger | Users log activities across 4 categories (Transport, Food, Energy, Shopping). Each log calculates CO2 using India-specific emission factors and updates a real-time Carbon Gauge and 7-day stacked bar chart. |
+| **"reduce"** | `/challenges` page with weekly action plan | Gemini generates 5 personalized weekly eco-challenges targeting the user's highest-emission categories. Completing challenges earns badges and builds streaks. |
+| **"simple actions"** | One-tap logging + live CO2 preview | The ActivityCard component shows a live CO2 preview (green/amber/red) as the user adjusts quantity. Logging requires a single tap. Onboarding is a single question. |
+| **"personalized insights"** | Gemini analyzes YOUR actual data | Unlike generic carbon calculators, EcoMind sends the user's real weekly breakdown to Gemini 2.5 Flash, which returns 3 specific tips with estimated savings — tailored to Indian lifestyle and infrastructure. |
+
+### Feature → Problem Statement Mapping
+
+```mermaid
+graph LR
+    A[Log Activity] -->|one-tap| B[Track /track]
+    B -->|weekly data| C[Understand /insights]
+    C -->|AI analysis| D[Personalized Insights]
+    D -->|become| E[Reduce /challenges]
+    E -->|streaks & badges| A
+```
+
+- **Landing page (`/`)**: One-question onboarding captures lifestyle focus → Gemini immediately generates a personalized opening insight before any data is logged.
+- **Track page (`/track`)**: Real-time CO2 calculation with live preview → Carbon Gauge shows progress against 5 kg daily target.
+- **Insights page (`/insights`)**: Gemini-powered weekly report with 3 actionable tips + comparison bars + trend charts.
+- **Challenges page (`/challenges`)**: 5 AI-generated weekly challenges with difficulty ratings, completion tracking, and badge rewards.
+
+---
+
 *Built with 💚 for PromptWars Challenge 3 — Virtual PromptWars Challenge, Hack2skill*

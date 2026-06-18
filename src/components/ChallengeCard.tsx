@@ -121,6 +121,7 @@ export default function ChallengeCard({ challenge, onComplete }: ChallengeCardPr
             onClick={handleComplete}
             disabled={isCompleting}
             className="h-10 px-5 rounded-xl bg-primary text-on-primary hover:bg-primary-container transition-all duration-200 font-semibold text-xs active:scale-95 disabled:opacity-50 cursor-pointer flex items-center gap-1.5 shadow-md shadow-primary/20"
+            aria-label={`Mark challenge "${challenge.title}" as complete`}
           >
             {isCompleting ? (
               <>
