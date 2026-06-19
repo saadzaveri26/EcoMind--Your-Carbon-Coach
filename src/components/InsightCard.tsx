@@ -16,7 +16,7 @@ interface InsightCardProps {
   isAdding?: boolean;
 }
 
-export default function InsightCard({ insight, onTryThis, isAdding = false }: InsightCardProps) {
+function InsightCard({ insight, onTryThis, isAdding = false }: InsightCardProps) {
   const getImpactDetails = (level: "High" | "Medium" | "Low") => {
     switch (level) {
       case "High":
@@ -93,3 +93,5 @@ export default function InsightCard({ insight, onTryThis, isAdding = false }: In
     </div>
   );
 }
+
+export default React.memo(InsightCard);

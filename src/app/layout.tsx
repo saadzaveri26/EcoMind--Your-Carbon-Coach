@@ -47,8 +47,14 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background text-on-background font-body antialiased pb-24 md:pb-0 pt-16 md:pt-24 min-h-screen">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 bg-primary text-on-primary px-4 py-2 rounded-xl shadow-lg border border-primary/20"
+        >
+          Skip to main content
+        </a>
         <Navigation />
-        <main id="main-content">
+        <main id="main-content" role="main">
           {children}
         </main>
       </body>

@@ -19,7 +19,7 @@ interface ChallengeCardProps {
   onComplete: (id: string) => Promise<void>;
 }
 
-export default function ChallengeCard({ challenge, onComplete }: ChallengeCardProps) {
+function ChallengeCard({ challenge, onComplete }: ChallengeCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
 
   const handleComplete = async () => {
@@ -140,3 +140,5 @@ export default function ChallengeCard({ challenge, onComplete }: ChallengeCardPr
     </motion.div>
   );
 }
+
+export default React.memo(ChallengeCard);

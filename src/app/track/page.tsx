@@ -25,7 +25,7 @@ export default function TrackPage() {
   );
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = React.useCallback(async (id: string) => {
     setIsDeleting(id);
     try {
       await deleteActivity(id);
@@ -34,21 +34,37 @@ export default function TrackPage() {
     } finally {
       setIsDeleting(null);
     }
-  };
+  }, [deleteActivity]);
 
-  const getActivityLabel = (cat: string, type: string) => {
+  const handleActivityLogged = React.useCallback(() => {
+    // No-op for current design
+  }, []);
+
+  const getActivityLabel = React.useCallback((cat: string, type: string) => {
     const catFactors = CARBON_FACTORS[cat];
     if (!catFactors) return type;
     const config = catFactors[type];
     return config ? config.label : type;
-  };
+  }, []);
 
-  const getActivityUnit = (cat: string, type: string) => {
+  const getActivityUnit = React.useCallback((cat: string, type: string) => {
     const catFactors = CARBON_FACTORS[cat];
     if (!catFactors) return "";
     const config = catFactors[type];
     return config ? config.unit : "";
-  };
+  }, []);
+
+  const todayStr = React.useMemo(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }, []);
+
+  const todayActivities = React.useMemo(() => {
+    return activities.filter((act) => act.date === todayStr);
+  }, [activities, todayStr]);
 
   if (authLoading) {
     return (
@@ -82,16 +98,6 @@ export default function TrackPage() {
     );
   }
 
-  // Filter activities logged today (local time YYYY-MM-DD)
-  const getLocalDateString = (d: Date) => {
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-  const todayStr = getLocalDateString(new Date());
-  const todayActivities = activities.filter((act) => act.date === todayStr);
-
   return (
     <main className="max-w-4xl mx-auto px-6 py-6 flex flex-col gap-8">
       {/* Header */}
@@ -118,7 +124,7 @@ export default function TrackPage() {
         <ActivityCard
           category={category}
           userId={user.uid}
-          onActivityLogged={() => {}}
+          onActivityLogged={handleActivityLogged}
         />
       </section>
 

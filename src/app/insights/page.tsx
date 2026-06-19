@@ -56,91 +56,98 @@ export default function InsightsPage() {
   }, [user, weekStart]);
 
   // Calculations for 14-day comparison
-  const getLocalDateString = (d: Date) => {
+  const getLocalDateString = React.useCallback((d: Date) => {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
-  };
+  }, []);
 
-  const today = new Date();
+  const { thisWeekDays, lastWeekDays } = React.useMemo(() => {
+    const todayVal = new Date();
+    const thisDays: string[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(todayVal.getDate() - i);
+      thisDays.push(getLocalDateString(d));
+    }
+    const lastDays: string[] = [];
+    for (let i = 13; i >= 7; i--) {
+      const d = new Date();
+      d.setDate(todayVal.getDate() - i);
+      lastDays.push(getLocalDateString(d));
+    }
+    return { thisWeekDays: thisDays, lastWeekDays: lastDays };
+  }, [getLocalDateString]);
+
+  const thisWeekLogs = React.useMemo(() => {
+    return activities.filter((a) => thisWeekDays.includes(a.date));
+  }, [activities, thisWeekDays]);
+
+  const lastWeekLogs = React.useMemo(() => {
+    return activities.filter((a) => lastWeekDays.includes(a.date));
+  }, [activities, lastWeekDays]);
+
+  const thisWeekTotal = React.useMemo(() => {
+    return thisWeekLogs.reduce((sum, a) => sum + a.co2kg, 0);
+  }, [thisWeekLogs]);
+
+  const lastWeekTotal = React.useMemo(() => {
+    return lastWeekLogs.reduce((sum, a) => sum + a.co2kg, 0);
+  }, [lastWeekLogs]);
+
+  const weekdays = React.useMemo(() => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], []);
   
-  // This Week dates (last 7 days including today)
-  const thisWeekDays: string[] = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(today.getDate() - i);
-    thisWeekDays.push(getLocalDateString(d));
-  }
-
-  // Last Week dates (7 days before that)
-  const lastWeekDays: string[] = [];
-  for (let i = 13; i >= 7; i--) {
-    const d = new Date();
-    d.setDate(today.getDate() - i);
-    lastWeekDays.push(getLocalDateString(d));
-  }
-
-  // Filter activities
-  const thisWeekLogs = activities.filter((a) => thisWeekDays.includes(a.date));
-  const lastWeekLogs = activities.filter((a) => lastWeekDays.includes(a.date));
-
-  const thisWeekTotal = thisWeekLogs.reduce((sum, a) => sum + a.co2kg, 0);
-  const lastWeekTotal = lastWeekLogs.reduce((sum, a) => sum + a.co2kg, 0);
-
-  // Group emissions by day of week for LineChart comparison
-  const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  
-  // Helper to map index
-  const getDayIndex = (dateStr: string) => {
+  const getDayIndex = React.useCallback((dateStr: string) => {
     const d = new Date(dateStr + "T00:00:00");
-    // getDay returns 0 for Sunday, 1 for Monday...
-    // Map to Monday = 0, Sunday = 6
     const day = d.getDay();
     return day === 0 ? 6 : day - 1;
-  };
+  }, []);
 
-  const lineChartData = weekdays.map((dayName, idx) => {
-    // Sum for this week matching day
-    const thisDayLogs = thisWeekLogs.filter((a) => getDayIndex(a.date) === idx);
-    const lastDayLogs = lastWeekLogs.filter((a) => getDayIndex(a.date) === idx);
+  const lineChartData = React.useMemo(() => {
+    return weekdays.map((dayName, idx) => {
+      const thisDayLogs = thisWeekLogs.filter((a) => getDayIndex(a.date) === idx);
+      const lastDayLogs = lastWeekLogs.filter((a) => getDayIndex(a.date) === idx);
+      return {
+        day: dayName,
+        "This Week": Number(thisDayLogs.reduce((sum, a) => sum + a.co2kg, 0).toFixed(2)),
+        "Last Week": Number(lastDayLogs.reduce((sum, a) => sum + a.co2kg, 0).toFixed(2)),
+      };
+    });
+  }, [weekdays, thisWeekLogs, lastWeekLogs, getDayIndex]);
 
-    return {
-      day: dayName,
-      "This Week": Number(thisDayLogs.reduce((sum, a) => sum + a.co2kg, 0).toFixed(2)),
-      "Last Week": Number(lastDayLogs.reduce((sum, a) => sum + a.co2kg, 0).toFixed(2)),
-    };
-  });
-
-  // Calculate highest day
-  const dailyTotals = thisWeekDays.map((dateStr) => {
-    const total = thisWeekLogs.filter((a) => a.date === dateStr).reduce((sum, a) => sum + a.co2kg, 0);
-    return { dateStr, total };
-  });
-  let highestDayName = "None";
-  if (dailyTotals.length > 0) {
-    const maxDay = dailyTotals.reduce((max, d) => (d.total > max.total ? d : max), { dateStr: "", total: -1 });
-    if (maxDay.total > 0) {
-      const d = new Date(maxDay.dateStr + "T00:00:00");
-      highestDayName = d.toLocaleDateString("en-US", { weekday: "long" });
+  const highestDayName = React.useMemo(() => {
+    const dailyTotals = thisWeekDays.map((dateStr) => {
+      const total = thisWeekLogs.filter((a) => a.date === dateStr).reduce((sum, a) => sum + a.co2kg, 0);
+      return { dateStr, total };
+    });
+    if (dailyTotals.length > 0) {
+      const maxDay = dailyTotals.reduce((max, d) => (d.total > max.total ? d : max), { dateStr: "", total: -1 });
+      if (maxDay.total > 0) {
+        const d = new Date(maxDay.dateStr + "T00:00:00");
+        return d.toLocaleDateString("en-US", { weekday: "long" });
+      }
     }
-  }
+    return "None";
+  }, [thisWeekDays, thisWeekLogs]);
 
-  // Calculate biggest category
-  const categories = ["Transport", "Food", "Energy", "Shopping"];
-  const categoryTotals = categories.map((cat) => {
-    const total = thisWeekLogs.filter((a) => a.category === cat).reduce((sum, a) => sum + a.co2kg, 0);
-    return { cat, total };
-  });
-  const biggestCat = categoryTotals.reduce((max, c) => (c.total > max.total ? c : max), { cat: "None", total: 0 });
+  const biggestCat = React.useMemo(() => {
+    const categories = ["Transport", "Food", "Energy", "Shopping"];
+    const categoryTotals = categories.map((cat) => {
+      const total = thisWeekLogs.filter((a) => a.category === cat).reduce((sum, a) => sum + a.co2kg, 0);
+      return { cat, total };
+    });
+    return categoryTotals.reduce((max, c) => (c.total > max.total ? c : max), { cat: "None", total: 0 });
+  }, [thisWeekLogs]);
 
-  // Calculate percentage vs last week
-  let percentageChange = 0;
-  if (lastWeekTotal > 0) {
-    percentageChange = Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100);
-  }
+  const percentageChange = React.useMemo(() => {
+    if (lastWeekTotal > 0) {
+      return Math.round(((thisWeekTotal - lastWeekTotal) / lastWeekTotal) * 100);
+    }
+    return 0;
+  }, [thisWeekTotal, lastWeekTotal]);
 
-  const handleGenerateReport = async () => {
+  const handleGenerateReport = React.useCallback(async () => {
     if (!user) return;
     setGeneratingReport(true);
     setInsights([]);
@@ -177,9 +184,9 @@ export default function InsightsPage() {
     } finally {
       setGeneratingReport(false);
     }
-  };
+  }, [user, thisWeekLogs, lifestyle, thisWeekTotal]);
 
-  const handleTryThis = async (insight: Insight) => {
+  const handleTryThis = React.useCallback(async (insight: Insight) => {
     if (!user) return;
     setAddingChallengeId(insight.title);
     setSuccessChallenge("");
@@ -201,7 +208,6 @@ export default function InsightsPage() {
       if (snap.exists()) {
         const existingData = snap.data();
         const items = existingData.items || [];
-        // Add to items list if it doesn't already contain a challenge with this title
         if (!items.some((c: any) => c.title === newChallenge.title)) {
           await updateDoc(challengesRef, {
             items: [...items, newChallenge],
@@ -221,7 +227,7 @@ export default function InsightsPage() {
     } finally {
       setAddingChallengeId(null);
     }
-  };
+  }, [user, weekStart]);
 
   if (authLoading) {
     return (

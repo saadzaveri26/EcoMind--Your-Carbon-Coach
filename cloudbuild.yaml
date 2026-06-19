@@ -12,14 +12,14 @@ steps:
       - '--build-arg'
       - 'NEXT_PUBLIC_FIREBASE_APP_ID=1:903694242938:web:317cb9bf166cc7323257c3'
       - '-t'
-      - 'asia-south1-docker.pkg.dev/ecomind-carbon-coach-499610/ecomind/ecomind-app:latest'
+      - 'asia-south1-docker.pkg.dev/amd-hackathon-493310/ecomind/ecomind-app:latest'
       - '.'
 
   # Step 2: Push the container image to Artifact Registry
   - name: "gcr.io/cloud-builders/docker"
     args:
       - "push"
-      - "asia-south1-docker.pkg.dev/ecomind-carbon-coach-499610/ecomind/ecomind-app:latest"
+      - "asia-south1-docker.pkg.dev/amd-hackathon-493310/ecomind/ecomind-app:latest"
 
   # Step 3: Deploy to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
@@ -27,16 +27,15 @@ steps:
     args:
       - "run"
       - "deploy"
-      - "ecomind-carbon-coach-499610"
-      - "--image=asia-south1-docker.pkg.dev/ecomind-carbon-coach-499610/ecomind/ecomind-app:latest"
-      - "--region=asia-south1"
-      - "--project=ecomind-carbon-coach-499610"
+      - "ecomind"
+      - "--image=asia-south1-docker.pkg.dev/amd-hackathon-493310/ecomind/ecomind-app:latest"
+      - "--region=us-central1"
+      - "--project=amd-hackathon-493310"
       - "--platform=managed"
       - "--allow-unauthenticated"
       - "--port=3080"
       - "--memory=1Gi"
       - "--cpu=1"
-      - "--set-env-vars=NEXT_PUBLIC_FIREBASE_API_KEY=${_NEXT_PUBLIC_FIREBASE_API_KEY},NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=${_NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN},NEXT_PUBLIC_FIREBASE_PROJECT_ID=${_NEXT_PUBLIC_FIREBASE_PROJECT_ID},NEXT_PUBLIC_FIREBASE_APP_ID=${_NEXT_PUBLIC_FIREBASE_APP_ID}"
       - "--set-secrets=GEMINI_API_KEY=GEMINI_API_KEY:latest,FIREBASE_PRIVATE_KEY=FIREBASE_PRIVATE_KEY:latest,FIREBASE_CLIENT_EMAIL=FIREBASE_CLIENT_EMAIL:latest"
 
   # Step 4: Add IAM policy binding to ensure public access (preventing 403 Forbidden)
@@ -46,17 +45,11 @@ steps:
       - "run"
       - "services"
       - "add-iam-policy-binding"
-      - "ecomind-carbon-coach-499610"
-      - "--region=asia-south1"
-      - "--project=ecomind-carbon-coach-499610"
+      - "ecomind"
+      - "--region=us-central1"
+      - "--project=amd-hackathon-493310"
       - "--member=allUsers"
       - "--role=roles/run.invoker"
 
 options:
   logging: CLOUD_LOGGING_ONLY
-
-substitutions:
-  _NEXT_PUBLIC_FIREBASE_API_KEY: ""
-  _NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ""
-  _NEXT_PUBLIC_FIREBASE_PROJECT_ID: ""
-  _NEXT_PUBLIC_FIREBASE_APP_ID: ""

@@ -10,7 +10,7 @@ interface ActivityCardProps {
   onActivityLogged: () => void;
 }
 
-export default function ActivityCard({ category, userId, onActivityLogged }: ActivityCardProps) {
+function ActivityCard({ category, userId, onActivityLogged }: ActivityCardProps) {
   const factors = CARBON_FACTORS[category] || {};
   const activityKeys = Object.keys(factors);
   const defaultActivity = activityKeys[0] || "";
@@ -188,3 +188,5 @@ export default function ActivityCard({ category, userId, onActivityLogged }: Act
     </AnimatePresence>
   );
 }
+
+export default React.memo(ActivityCard);

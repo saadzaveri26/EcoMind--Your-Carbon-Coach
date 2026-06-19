@@ -61,21 +61,18 @@ export default function ChallengesPage() {
     return () => unsubscribe();
   }, [user]);
 
-  const handleGenerateChallenges = async () => {
+  const handleGenerateChallenges = React.useCallback(async () => {
     if (!user) return;
     setGeneratingChallenges(true);
 
-    // Calculate top categories of user based on their logged activities
     const categories = ["Transport", "Food", "Energy", "Shopping"];
     const categoryTotals = categories.map((cat) => {
       const total = activities.filter((a) => a.category === cat).reduce((sum, a) => sum + a.co2kg, 0);
       return { cat, total };
     });
-    // Sort descending
     categoryTotals.sort((a, b) => b.total - a.total);
     let topCategories = categoryTotals.filter((c) => c.total > 0).map((c) => c.cat);
 
-    // Fallbacks if no activities logged yet
     if (topCategories.length === 0) {
       topCategories = [profile?.lifestyle || "Transport"];
     }
@@ -99,9 +96,9 @@ export default function ChallengesPage() {
     } finally {
       setGeneratingChallenges(false);
     }
-  };
+  }, [user, activities, profile]);
 
-  const badgeTemplates: BadgeConfig[] = [
+  const badgeTemplates = React.useMemo<BadgeConfig[]>(() => [
     {
       id: "first_challenge",
       name: "Carbon Cutter",
@@ -123,14 +120,16 @@ export default function ChallengesPage() {
       icon: <Icons.Flame className="w-6 h-6" />,
       color: "bg-red-500/10 text-red-400 border-red-500/30",
     },
-  ];
+  ], []);
 
-  // Logic to dynamically check for streak badge
-  const currentBadges = profile?.badgesEarned || [];
-  const streak = profile?.streakDays || 0;
-  if (streak >= 3 && !currentBadges.includes("streak_3")) {
-    currentBadges.push("streak_3");
-  }
+  const { currentBadges, streak } = React.useMemo(() => {
+    const list = profile?.badgesEarned ? [...profile.badgesEarned] : [];
+    const strk = profile?.streakDays || 0;
+    if (strk >= 3 && !list.includes("streak_3")) {
+      list.push("streak_3");
+    }
+    return { currentBadges: list, streak: strk };
+  }, [profile]);
 
   if (authLoading) {
     return (
