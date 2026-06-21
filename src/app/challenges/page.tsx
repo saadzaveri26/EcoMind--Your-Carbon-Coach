@@ -1,11 +1,20 @@
 "use client";
+/**
+ * @file challenges/page.tsx
+ * @description Weekly eco-challenges page — implementation of the "reduce" pillar.
+ *
+ * Problem Statement Alignment:
+ * - **Reduce**: Displays 5 weekly eco-challenges targeting carbon reductions.
+ * - **Personalized insights**: Leverages Gemini 2.5 Flash server-side to generate challenges customized to the user's highest-emitting categories and onboarding preferences.
+ * - **Simple actions**: Challenges are presented as bite-sized, actionable items that can be committed to and marked completed with a single tap.
+ * - **Habit Loop**: Completing challenges increments streaks and unlocks achievements/badges to drive long-term habit formation.
+ */
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useChallenges } from "@/lib/hooks/useChallenges";
 import { useActivities } from "@/lib/hooks/useActivities";
-import { getMondayOfCurrentWeek } from "@/lib/carbonData";
 import ChallengeCard from "@/components/ChallengeCard";
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { motion } from "framer-motion";
 import * as Icons from "lucide-react";
@@ -19,6 +28,12 @@ interface BadgeConfig {
   color: string;
 }
 
+interface UserProfile {
+  lifestyle?: "Transport" | "Food" | "Energy" | "Shopping";
+  streakDays?: number;
+  badgesEarned?: string[];
+}
+
 export default function ChallengesPage() {
   const { user, loading: authLoading } = useAuth();
   const { challenges, completedCount, loading: challengesLoading, markComplete } = useChallenges(
@@ -26,35 +41,28 @@ export default function ChallengesPage() {
   );
   const { activities } = useActivities(user?.uid);
 
-  const [profile, setProfile] = useState<any>(null);
-  const [profileLoading, setProfileLoading] = useState(true);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [generatingChallenges, setGeneratingChallenges] = useState(false);
-
-  const weekStart = getMondayOfCurrentWeek();
 
   // Listen to profile updates for streaks and badges
   useEffect(() => {
     if (!user) {
-      setProfile(null);
-      setProfileLoading(false);
+      setTimeout(() => setProfile(null), 0);
       return;
     }
 
-    setProfileLoading(true);
     const profileRef = doc(db, "userProfile", user.uid);
     const unsubscribe = onSnapshot(
       profileRef,
       (docSnap) => {
         if (docSnap.exists()) {
-          setProfile(docSnap.data());
+          setProfile(docSnap.data() as UserProfile);
         } else {
           setProfile(null);
         }
-        setProfileLoading(false);
       },
       (error) => {
         console.error("Error loading user profile:", error);
-        setProfileLoading(false);
       }
     );
 

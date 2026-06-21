@@ -36,7 +36,10 @@ const querySchema = z.object({
 export async function GET(req: NextRequest) {
   const ip = getClientIp(req);
   if (isRateLimited(ip, 60)) {
-    return NextResponse.json({ message: "Too many requests. Please try again later." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later.", message: "Too many requests. Please try again later.", code: "RATE_LIMIT_EXCEEDED" },
+      { status: 429 }
+    );
   }
 
   try {
@@ -49,7 +52,7 @@ export async function GET(req: NextRequest) {
     const parsed = querySchema.safeParse(params);
     if (!parsed.success) {
       return NextResponse.json(
-        { message: "Invalid query parameters", errors: parsed.error.flatten() },
+        { error: "Invalid query parameters", message: "Invalid query parameters", errors: parsed.error.flatten(), code: "VALIDATION_ERROR" },
         { status: 400 }
       );
     }
@@ -143,6 +146,9 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Error generating summary:", error);
     const msg = error instanceof Error ? error.message : "Internal server error";
-    return NextResponse.json({ message: msg }, { status: 500 });
+    return NextResponse.json(
+      { error: msg, message: msg, code: "INTERNAL_SERVER_ERROR" },
+      { status: 500 }
+    );
   }
 }

@@ -84,9 +84,9 @@ export default function ComparisonBar({ userCO2, indiaCO2, globalCO2 }: Comparis
           }`}
         >
           {isBelowIndiaAvg ? (
-            <span>🎉 You're {percentBelow}% below the India daily average!</span>
+            <span>🎉 You&apos;re {percentBelow}% below the India daily average!</span>
           ) : (
-            <span>⚠️ You're {Math.abs(percentBelow)}% above the India daily average.</span>
+            <span>⚠️ You&apos;re {Math.abs(percentBelow)}% above the India daily average.</span>
           )}
         </div>
       </div>

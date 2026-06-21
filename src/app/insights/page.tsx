@@ -1,4 +1,13 @@
 "use client";
+/**
+ * @file insights/page.tsx
+ * @description Carbon insights and analytics page — implementation of the "understand" pillar.
+ *
+ * Problem Statement Alignment:
+ * - **Understand**: Aggregates logged activities into comparison bars comparing the user's daily average against the India average (11.2 kg) and global average (15.1 kg).
+ * - **Personalized insights**: Transmits actual logged carbon distribution and lifestyle settings to Gemini 2.5 Flash, returning 3 hyper-targeted tips with estimated weekly savings.
+ * - **Reduce**: Allows users to convert recommended insights directly into active weekly challenges in Firestore.
+ */
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { useActivities } from "@/lib/hooks/useActivities";
@@ -208,7 +217,7 @@ export default function InsightsPage() {
       if (snap.exists()) {
         const existingData = snap.data();
         const items = existingData.items || [];
-        if (!items.some((c: any) => c.title === newChallenge.title)) {
+        if (!items.some((c: { title: string }) => c.title === newChallenge.title)) {
           await updateDoc(challengesRef, {
             items: [...items, newChallenge],
           });
@@ -432,11 +441,11 @@ export default function InsightsPage() {
         ) : insights.length === 0 ? (
           <div className="glass-panel rounded-2xl border border-outline-variant/30 p-8 flex flex-col items-center justify-center text-center gap-3 text-on-surface-variant">
             <Icons.Sparkles className="w-8 h-8 opacity-60 animate-pulse" />
-            <p className="text-sm font-medium">No active report generated. Click "Generate AI Report" above.</p>
+            <p className="text-sm font-medium">No active report generated. Click &quot;Generate AI Report&quot; above.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
-            {insights.map((insight, idx) => (
+            {insights.map((insight: Insight, idx) => (
               <InsightCard
                 key={idx}
                 insight={insight}

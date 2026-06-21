@@ -310,6 +310,8 @@ Each skill is a structured `.md` prompt file in `.agents/skills/`. The `startcyc
 
 ---
 
+---
+
 ## 🎯 Problem Statement Alignment
 
 The challenge states: *"Help individuals understand, track, and reduce their carbon footprint through simple actions and personalized insights."*
@@ -342,4 +344,64 @@ graph LR
 
 ---
 
+### 🇮🇳 India-Specific Carbon Emission Factors
+
+EcoMind utilizes real regional emission factors (expressed in kg CO2 per unit) to ensure carbon footprint estimates are highly localized for Indian citizens:
+
+1. **Energy (Grid & Household)**:
+   - **Grid Electricity**: **0.82 kg CO2 / kWh** (source: Central Electricity Authority (CEA) of India average, reflecting India's coal-heavy grid mix).
+   - **LPG Cooking**: **0.34 kg CO2 / hour** (adjusted for typical Indian cooking burners and standard cylinder consumption).
+   - **AC Usage**: **1.25 kg CO2 / hour** (typical 1.5-ton AC power draw under Indian summer conditions).
+   - **Fan Usage**: **0.038 kg CO2 / hour** (power consumption of typical ceiling fans widely used in Indian households).
+
+2. **Transport (Commutes & Travel)**:
+   - **Auto Rickshaw**: **0.097 kg CO2 / km** (highly common intermediate public transport in urban India).
+   - **Motorcycle / Scooter**: **0.11 kg CO2 / km** (two-wheelers dominate Indian roads).
+   - **Petrol Car**: **0.21 kg CO2 / km** (standard passenger vehicle factor).
+   - **Diesel Car**: **0.17 kg CO2 / km** (diesel passenger vehicle factor).
+   - **Bus**: **0.089 kg CO2 / km** (regional bus transit average).
+   - **Train**: **0.041 kg CO2 / km** (Indian Railways electrified/diesel passenger transit average).
+   - **Flight (Domestic)**: **0.255 kg CO2 / km** (airline travel average).
+
+3. **Food (Indian Dietary Choices)**:
+   - **Vegetarian Meal**: **0.37 kg CO2 / meal** (traditional Indian diet, rich in lentils/grains).
+   - **Vegan Meal**: **0.18 kg CO2 / meal** (pure plant-based meal).
+   - **Chicken Meal**: **1.24 kg CO2 / meal** (broiler poultry average portion).
+   - **Seafood Meal**: **6.61 kg CO2 / meal** (coastal fish and shellfish average portion).
+   - **Dairy**: **0.31 kg CO2 / 100ml** (milk/curd/paneer consumption, highly prevalent in Indian culinary habits).
+
+4. **Shopping (Daily Goods & Consumables)**:
+   - **Clothing**: **10.0 kg CO2 / item** (average textile manufacture footprint).
+   - **Electronics**: **70.0 kg CO2 / item** (average consumer electronics hardware manufacturing footprint).
+   - **Delivery**: **0.5 kg CO2 / delivery** (typical regional logistics/e-commerce last-mile shipping).
+   - **Plastic Bag**: **0.033 kg CO2 / bag** (standard thin single-use plastic carrier).
+
+---
+
+### 🤖 Gemini-Powered Personalization vs. Static Checklists
+
+Traditional carbon tracking apps present static lists of tips (e.g. "eat less meat" or "use public transit") which users quickly tune out. EcoMind solves this by utilizing **Gemini 2.5 Flash** server-side to generate dynamic, hyper-personalized insights and challenges:
+- **Actual User Data**: The Gemini prompt contains the user's *actual* weekly carbon category breakdown and logged activities.
+- **Lifestyle Preference Context**: Gemini factors in the user's chosen onboarding lifestyle focus (Transport, Food, Energy, or Shopping).
+- **Dynamic Challenges**: If a user's logs reveal high energy usage from AC but their focus is Transport, Gemini intelligently prioritizes energy challenges first while offering a path to reduce transport emissions, targeting the highest real potential savings.
+- **Explainability**: Rather than just ordering actions, the model explains *why* the suggestion fits the user's specific context, bridging the gap between tracking and understanding.
+
+---
+
+### ⚡ Mechanics of "Simple Actions"
+
+To lower the barrier to habit formation, EcoMind simplifies the user interface and provides instant feedback loops:
+1. **Live CO2 Preview**: As users adjust quantities on the `/track` page, the `ActivityCard` computes and updates the estimated footprint in real time *before* submission. The preview is color-coded:
+   - **Green (<1.5 kg CO2)**: Minor daily footprint.
+   - **Amber (1.5 - 5.0 kg CO2)**: Moderate footprint.
+   - **Red (>5.0 kg CO2)**: High-impact activity.
+2. **Dynamic Carbon Gauge**: The circular gauge on the dashboard gives an instant visual health check against the sustainable Paris-aligned **5.0 kg daily CO2 target**:
+   - **Green (<5.0 kg)**: Low footprint (Sustainable).
+   - **Amber (5.0 - 10.0 kg)**: Approaching/exceeding target.
+   - **Red (>10.0 kg)**: High carbon day.
+3. **One-Tap Actions**: The category picker, quick tabs, and pre-populated quantities minimize text fields and keystrokes, making carbon logging a 3-second routine.
+
+---
+
 *Built with 💚 for PromptWars Challenge 3 — Virtual PromptWars Challenge, Hack2skill*
+

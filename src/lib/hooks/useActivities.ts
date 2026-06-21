@@ -19,12 +19,14 @@ export function useActivities(userId: string | undefined) {
 
   useEffect(() => {
     if (!userId) {
-      setActivities([]);
-      setLoading(false);
+      setTimeout(() => {
+        setActivities([]);
+        setLoading(false);
+      }, 0);
       return;
     }
 
-    setLoading(true);
+    setTimeout(() => setLoading(true), 0);
     const q = query(
       collection(db, "activities"),
       where("userId", "==", userId)

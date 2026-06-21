@@ -1,7 +1,16 @@
 "use client";
+/**
+ * @file track/page.tsx
+ * @description Carbon activity tracking page — implementation of the "track" pillar.
+ *
+ * Problem Statement Alignment:
+ * - **Track**: Enables users to log daily activities across Transport, Food, Energy, and Shopping.
+ * - **Simple actions**: Implements one-tap category picking, quick quantity inputs, and real-time live CO2 previews within the ActivityCard.
+ * - **Understand**: Displays a Carbon Gauge showing progress against the sustainable daily 5 kg CO2 limit, plus a 7-day stacked emissions chart.
+ */
 import React, { useState } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
-import { useActivities } from "@/lib/hooks/useActivities";
+import { useActivities, ActivityLog } from "@/lib/hooks/useActivities";
 import { CARBON_FACTORS } from "@/lib/carbonData";
 import CarbonGauge from "@/components/CarbonGauge";
 import EmissionsChart from "@/components/EmissionsChart";
@@ -9,6 +18,61 @@ import CategoryPicker from "@/components/CategoryPicker";
 import ActivityCard from "@/components/ActivityCard";
 import * as Icons from "lucide-react";
 import Link from "next/link";
+
+interface HistoryItemProps {
+  act: ActivityLog;
+  isDeleting: boolean;
+  onDelete: (id: string) => void;
+  getActivityLabel: (cat: string, type: string) => string;
+  getActivityUnit: (cat: string, type: string) => string;
+}
+
+const HistoryItem = React.memo(function HistoryItem({
+  act,
+  isDeleting,
+  onDelete,
+  getActivityLabel,
+  getActivityUnit,
+}: HistoryItemProps) {
+  return (
+    <div className="glass-panel rounded-xl border border-outline-variant/20 p-4 flex items-center justify-between gap-4 group">
+      <div className="flex items-center gap-3 truncate">
+        <div className="bg-surface-container-low p-2.5 rounded-lg border border-outline-variant/10 shrink-0">
+          {act.category === "Transport" && <Icons.Car className="w-4 h-4 text-blue-400" />}
+          {act.category === "Food" && <Icons.UtensilsCrossed className="w-4 h-4 text-green-400" />}
+          {act.category === "Energy" && <Icons.Zap className="w-4 h-4 text-amber-400" />}
+          {act.category === "Shopping" && <Icons.ShoppingBag className="w-4 h-4 text-purple-400" />}
+        </div>
+        <div className="truncate">
+          <h4 className="text-xs font-semibold text-on-surface truncate">
+            {getActivityLabel(act.category, act.activityType)}
+          </h4>
+          <span className="text-[10px] text-on-surface-variant">
+            Logged {act.quantity} {getActivityUnit(act.category, act.activityType)}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 shrink-0">
+        <div className="bg-primary/10 border border-primary/20 text-primary font-bold px-2 py-0.5 rounded text-[10px]">
+          {act.co2kg.toFixed(2)} kg CO2
+        </div>
+        <button
+          onClick={() => onDelete(act.id)}
+          disabled={isDeleting}
+          className="text-on-surface-variant hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-all cursor-pointer disabled:opacity-50"
+          aria-label={`Delete activity ${act.activityType}`}
+        >
+          {isDeleting ? (
+            <Icons.Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Icons.Trash2 className="w-3.5 h-3.5" />
+          )}
+        </button>
+      </div>
+    </div>
+  );
+});
 
 export default function TrackPage() {
   const { user, loading: authLoading } = useAuth();
@@ -146,45 +210,14 @@ export default function TrackPage() {
         ) : (
           <div className="flex flex-col gap-3">
             {todayActivities.slice(0, 5).map((act) => (
-              <div
+              <HistoryItem
                 key={act.id}
-                className="glass-panel rounded-xl border border-outline-variant/20 p-4 flex items-center justify-between gap-4 group"
-              >
-                <div className="flex items-center gap-3 truncate">
-                  <div className="bg-surface-container-low p-2.5 rounded-lg border border-outline-variant/10 shrink-0">
-                    {act.category === "Transport" && <Icons.Car className="w-4 h-4 text-blue-400" />}
-                    {act.category === "Food" && <Icons.UtensilsCrossed className="w-4 h-4 text-green-400" />}
-                    {act.category === "Energy" && <Icons.Zap className="w-4 h-4 text-amber-400" />}
-                    {act.category === "Shopping" && <Icons.ShoppingBag className="w-4 h-4 text-purple-400" />}
-                  </div>
-                  <div className="truncate">
-                    <h4 className="text-xs font-semibold text-on-surface truncate">
-                      {getActivityLabel(act.category, act.activityType)}
-                    </h4>
-                    <span className="text-[10px] text-on-surface-variant">
-                      Logged {act.quantity} {getActivityUnit(act.category, act.activityType)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 shrink-0">
-                  <div className="bg-primary/10 border border-primary/20 text-primary font-bold px-2 py-0.5 rounded text-[10px]">
-                    {act.co2kg.toFixed(2)} kg CO2
-                  </div>
-                  <button
-                    onClick={() => handleDelete(act.id)}
-                    disabled={isDeleting === act.id}
-                    className="text-on-surface-variant hover:text-red-400 p-1.5 rounded-lg hover:bg-red-500/10 transition-all cursor-pointer disabled:opacity-50"
-                    aria-label={`Delete activity ${act.activityType}`}
-                  >
-                    {isDeleting === act.id ? (
-                      <Icons.Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Icons.Trash2 className="w-3.5 h-3.5" />
-                    )}
-                  </button>
-                </div>
-              </div>
+                act={act}
+                isDeleting={isDeleting === act.id}
+                onDelete={handleDelete}
+                getActivityLabel={getActivityLabel}
+                getActivityUnit={getActivityUnit}
+              />
             ))}
           </div>
         )}

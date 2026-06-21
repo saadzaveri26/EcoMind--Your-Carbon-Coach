@@ -46,7 +46,7 @@ export default function CarbonGauge({ totalCO2 = 0 }: CarbonGaugeProps) {
   return (
     <div className="glass-panel rounded-2xl border border-outline-variant/30 p-6 flex flex-col items-center justify-center shadow-xl">
       <h3 className="text-sm font-semibold uppercase tracking-wider text-on-surface-variant mb-4 text-center">
-        Today's Carbon Footprint
+        Today&apos;s Carbon Footprint
       </h3>
       <div className="relative w-48 h-48 flex items-center justify-center">
         <svg className="w-full h-full -rotate-90" viewBox="0 0 160 160">

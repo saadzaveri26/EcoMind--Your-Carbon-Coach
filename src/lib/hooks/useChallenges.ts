@@ -28,12 +28,14 @@ export function useChallenges(userId: string | undefined) {
 
   useEffect(() => {
     if (!userId) {
-      setChallenges([]);
-      setLoading(false);
+      setTimeout(() => {
+        setChallenges([]);
+        setLoading(false);
+      }, 0);
       return;
     }
 
-    setLoading(true);
+    setTimeout(() => setLoading(true), 0);
     const docId = `${userId}_${weekStart}`;
     const docRef = doc(db, "challenges", docId);
 

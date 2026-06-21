@@ -28,9 +28,9 @@ interface ChallengeRaw {
 }
 
 const generateSchema = z.object({
-  userId: z.string().min(1),
-  topCategories: z.array(z.string()),
-  lifestyle: z.string().min(1),
+  userId: z.string().min(1).max(100),
+  topCategories: z.array(z.string().max(100)).max(10),
+  lifestyle: z.string().min(1).max(100),
 });
 
 /**
@@ -46,7 +46,10 @@ const generateSchema = z.object({
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
   if (isRateLimited(ip, 60)) {
-    return NextResponse.json({ message: "Too many requests. Please try again later." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later.", message: "Too many requests. Please try again later.", code: "RATE_LIMIT_EXCEEDED" },
+      { status: 429 }
+    );
   }
 
   try {
@@ -55,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { message: "Invalid payload parameters", errors: parsed.error.flatten() },
+        { error: "Invalid payload parameters", message: "Invalid payload parameters", errors: parsed.error.flatten(), code: "VALIDATION_ERROR" },
         { status: 400 }
       );
     }
@@ -80,9 +83,13 @@ export async function POST(req: NextRequest) {
       systemInstruction: "You are EcoMind, a friendly and practical carbon footprint coach. You help individuals in India understand their environmental impact and take realistic, affordable actions to reduce it. You are encouraging, never preachy or guilt-tripping. You suggest specific, actionable steps relevant to Indian lifestyle and infrastructure. You keep responses concise and motivating."
     });
 
-    const prompt = `Create exactly 5 personalized weekly eco-challenges for an Indian user whose top emission categories are: ${topCategories.join(
+    // Sanitize free-text parameters sent to Gemini
+    const cleanLifestyle = lifestyle.replace(/<[^>]*>/g, "").trim().substring(0, 100);
+    const cleanTopCategories = topCategories.map((c) => c.replace(/<[^>]*>/g, "").trim().substring(0, 100));
+
+    const prompt = `Create exactly 5 personalized weekly eco-challenges for an Indian user whose top emission categories are: ${cleanTopCategories.join(
       ", "
-    )} and lifestyle focus is: ${lifestyle}.
+    )} and lifestyle focus is: ${cleanLifestyle}.
 Return ONLY a valid JSON array, no markdown, no backticks.
 Schema: [{"id": "string (unique string short ID)", "title": "string (max 8 words)", "description": "string (max 40 words)", "targetCO2Saving": number (kg CO2 per week), "category": "string (Transport|Food|Energy|Shopping)", "difficulty": "Easy"|"Medium"|"Hard"}]`;
 
@@ -121,6 +128,9 @@ Schema: [{"id": "string (unique string short ID)", "title": "string (max 8 words
   } catch (error) {
     console.error("Error generating challenges:", error);
     const msg = error instanceof Error ? error.message : "Internal server error";
-    return NextResponse.json({ message: msg }, { status: 500 });
+    return NextResponse.json(
+      { error: msg, message: msg, code: "INTERNAL_SERVER_ERROR" },
+      { status: 500 }
+    );
   }
 }

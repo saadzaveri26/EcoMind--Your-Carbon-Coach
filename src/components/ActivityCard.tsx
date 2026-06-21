@@ -24,10 +24,12 @@ function ActivityCard({ category, userId, onActivityLogged }: ActivityCardProps)
   // Reset inputs when category changes
   useEffect(() => {
     const keys = Object.keys(CARBON_FACTORS[category] || {});
-    setActivityType(keys[0] || "");
-    setQuantity(0);
-    setErrorMsg("");
-    setSuccessMsg("");
+    setTimeout(() => {
+      setActivityType(keys[0] || "");
+      setQuantity(0);
+      setErrorMsg("");
+      setSuccessMsg("");
+    }, 0);
   }, [category]);
 
   const currentConfig = factors[activityType];

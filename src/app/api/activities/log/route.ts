@@ -19,10 +19,10 @@ import { FieldValue, QueryDocumentSnapshot } from "firebase-admin/firestore";
  */
 
 const logSchema = z.object({
-  userId: z.string().min(1),
+  userId: z.string().min(1).max(100),
   category: z.enum(["Transport", "Food", "Energy", "Shopping"]),
-  activityType: z.string().min(1),
-  quantity: z.number().positive(),
+  activityType: z.string().min(1).max(100),
+  quantity: z.number().positive().max(100000),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
 
@@ -39,7 +39,10 @@ const logSchema = z.object({
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
   if (isRateLimited(ip, 60)) {
-    return NextResponse.json({ message: "Too many requests. Please try again later." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later.", message: "Too many requests. Please try again later.", code: "RATE_LIMIT_EXCEEDED" },
+      { status: 429 }
+    );
   }
 
   try {
@@ -48,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { message: "Invalid input data", errors: parsed.error.flatten() },
+        { error: "Invalid input data", message: "Invalid input data", errors: parsed.error.flatten(), code: "VALIDATION_ERROR" },
         { status: 400 }
       );
     }
@@ -99,6 +102,9 @@ export async function POST(req: NextRequest) {
       console.error("Unknown error object:", error);
     }
     const msg = error instanceof Error ? error.message : "Internal server error";
-    return NextResponse.json({ message: msg }, { status: 500 });
+    return NextResponse.json(
+      { error: msg, message: msg, code: "INTERNAL_SERVER_ERROR" },
+      { status: 500 }
+    );
   }
 }

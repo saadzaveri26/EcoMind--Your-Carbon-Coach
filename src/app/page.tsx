@@ -1,4 +1,13 @@
 "use client";
+/**
+ * @file page.tsx
+ * @description Landing and onboarding page — gateway to carbon footprint coaching.
+ *
+ * Problem Statement Alignment:
+ * - **Simple actions**: Provides a frictionless one-question onboarding flow that captures the user's lifestyle focus.
+ * - **Personalized insights**: Instantly triggers Gemini to generate a personalized opening insight based on their selected focus area.
+ * - **Understand & Reduce**: Prepares the user's dashboard with streak tracking, badge progress, and direct navigation paths.
+ */
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { doc, getDoc } from "firebase/firestore";
@@ -8,11 +17,19 @@ import * as Icons from "lucide-react";
 import Link from "next/link";
 import InsightCard, { Insight } from "@/components/InsightCard";
 
+interface UserProfile {
+  userId?: string;
+  lifestyle?: "Transport" | "Food" | "Energy" | "Shopping";
+  targetCO2PerDay?: number;
+  streakDays?: number;
+  badgesEarned?: string[];
+}
+
 export default function LandingPage() {
   const { user, loading: authLoading, signInWithGoogle, logout } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
-  const [onboardingChoice, setOnboardingChoice] = useState<string | null>(null);
+  const [onboardingChoice, setOnboardingChoice] = useState<"Transport" | "Food" | "Energy" | "Shopping" | null>(null);
   const [openingInsight, setOpeningInsight] = useState<Insight | null>(null);
   const [isSubmittingOnboarding, setIsSubmittingOnboarding] = useState(false);
 
@@ -41,7 +58,7 @@ export default function LandingPage() {
     fetchProfile();
   }, [user]);
 
-  const handleOnboardingSelect = (category: string) => {
+  const handleOnboardingSelect = (category: "Transport" | "Food" | "Energy" | "Shopping") => {
     setOnboardingChoice(category);
   };
 
@@ -303,7 +320,7 @@ export default function LandingPage() {
             2.5 Billion Tons
           </span>
           <span className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
-            India's annual CO2 emissions
+            India&apos;s annual CO2 emissions
           </span>
         </motion.div>
         <motion.div

@@ -20,15 +20,15 @@ import { FieldValue } from "firebase-admin/firestore";
  */
 
 const generateSchema = z.object({
-  userId: z.string().min(1),
-  lifestyle: z.string().min(1),
+  userId: z.string().min(1).max(100),
+  lifestyle: z.string().min(1).max(100),
   weekData: z.object({
-    totalCO2: z.number(),
+    totalCO2: z.number().max(1000000),
     breakdown: z.object({
-      Transport: z.number(),
-      Food: z.number(),
-      Energy: z.number(),
-      Shopping: z.number(),
+      Transport: z.number().max(1000000),
+      Food: z.number().max(1000000),
+      Energy: z.number().max(1000000),
+      Shopping: z.number().max(1000000),
     }),
   }),
 });
@@ -46,7 +46,10 @@ const generateSchema = z.object({
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
   if (isRateLimited(ip, 60)) {
-    return NextResponse.json({ message: "Too many requests. Please try again later." }, { status: 429 });
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later.", message: "Too many requests. Please try again later.", code: "RATE_LIMIT_EXCEEDED" },
+      { status: 429 }
+    );
   }
 
   try {
@@ -55,7 +58,7 @@ export async function POST(req: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { message: "Invalid payload details", errors: parsed.error.flatten() },
+        { error: "Invalid payload details", message: "Invalid payload details", errors: parsed.error.flatten(), code: "VALIDATION_ERROR" },
         { status: 400 }
       );
     }
@@ -80,10 +83,13 @@ export async function POST(req: NextRequest) {
       systemInstruction: "You are EcoMind, a friendly and practical carbon footprint coach. You help individuals in India understand their environmental impact and take realistic, affordable actions to reduce it. You are encouraging, never preachy or guilt-tripping. You suggest specific, actionable steps relevant to Indian lifestyle and infrastructure. You keep responses concise and motivating."
     });
 
+    // Sanitize free-text parameters sent to Gemini
+    const cleanLifestyle = lifestyle.replace(/<[^>]*>/g, "").trim().substring(0, 100);
+
     const prompt = `Analyze this carbon footprint data for an Indian user:
 Weekly total: ${weekData.totalCO2} kg CO2
 Breakdown: Transport: ${weekData.breakdown.Transport} kg, Food: ${weekData.breakdown.Food} kg, Energy: ${weekData.breakdown.Energy} kg, Shopping: ${weekData.breakdown.Shopping} kg
-Their lifestyle focus: ${lifestyle}
+Their lifestyle focus: ${cleanLifestyle}
 
 Generate exactly 3 personalized, actionable insights.
 Return ONLY a valid JSON array, no markdown, no backticks.
@@ -121,6 +127,9 @@ Schema: [{"title": "string", "tip": "string (max 50 words)", "estimatedWeeklySav
   } catch (error) {
     console.error("Error generating insights:", error);
     const msg = error instanceof Error ? error.message : "Internal server error";
-    return NextResponse.json({ message: msg }, { status: 500 });
+    return NextResponse.json(
+      { error: msg, message: msg, code: "INTERNAL_SERVER_ERROR" },
+      { status: 500 }
+    );
   }
 }
